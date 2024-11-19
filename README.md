@@ -7,8 +7,8 @@ Las plantillas están organizadas en carpetas según casos de uso o servicios es
 
 Contenido:
 
-Plantillas de CloudFormation para infraestructura general.
-Ejemplos de plantillas para soluciones específicas (bases de datos, redes, etc.).
-Scripts y configuraciones complementarias.
+- Plantillas de CloudFormation para infraestructura general.
+- Ejemplos de plantillas para soluciones específicas (bases de datos, redes, etc.).
+- Scripts y configuraciones complementarias.
 
-Objetivo: Facilitar la gestión y despliegue de infraestructura como código en AWS mediante CloudFormation.
+**Objetivo:** Facilitar la gestión y despliegue de infraestructura como código en AWS mediante CloudFormation.
