@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla de CloudFormation para crear una zona DNS en Route 53 y agregar registros A, CNAME, MX, y TXT de ejemplo.
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: 'example.com'  # Este es el nombre del dominio para la zona DNS (ejemplo.com).
+    Description: El nombre de dominio para la zona DNS. Asegúrate de usar un dominio válido que ya esté registrado.
+
+  RecordAName:
+    Type: String
+    Default: 'www'  # Nombre del subdominio para el registro A, por ejemplo 'www' (www.example.com).
+    Description: El nombre del subdominio para el registro A. Si deseas apuntar el dominio principal, usa '@'.
+
+  RecordAValue:
+    Type: String
+    Default: '192.0.2.1'  # Dirección IP que el registro A debe apuntar.
+    Description: Dirección IP para el registro A. Asegúrate de que sea una IP válida a la que desees redirigir el subdominio.
+
+  RecordCNameName:
+    Type: String
+    Default: 'blog'  # Nombre del subdominio para el registro CNAME, por ejemplo 'blog' (blog.example.com).
+    Description: El nombre del subdominio para el registro CNAME.
+
+  RecordCNameValue:
+    Type: String
+    Default: 'example.com'  # Destino del CNAME. Este valor debe ser un dominio completamente calificado (FQDN).
+    Description: El valor al que el registro CNAME debe apuntar. Este puede ser un nombre de dominio completamente calificado (FQDN).
+
+  RecordMXName:
+    Type: String
+    Default: '@'  # El nombre del registro MX, generalmente es '@' para el dominio raíz.
+    Description: El nombre del subdominio para el registro MX. Usa '@' para el dominio principal.
+
+  RecordMXPriority:
+    Type: Number
+    Default: 10  # Prioridad del servidor de correo. Un número más bajo significa mayor prioridad.
+    Description: La prioridad del servidor de correo para el registro MX. Los valores más bajos tienen mayor prioridad.
+
+  RecordMXValue:
+    Type: String
+    Default: 'mail.example.com'  # El servidor de correo al que debe apuntar el registro MX.
+    Description: El servidor de correo para el registro MX. Asegúrate de que este servidor esté configurado y accesible.
+
+  RecordTXTName:
+    Type: String
+    Default: '@'  # El nombre del registro TXT, generalmente es '@' para el dominio raíz.
+    Description: El nombre del subdominio para el registro TXT. Usualmente se usa '@' para el dominio principal.
+
+  RecordTXTValue:
+    Type: String
+    Default: 'v=spf1 include:_spf.example.com ~all'  # Valor del registro TXT, útil para SPF o verificación de dominio.
+    Description: El valor para el registro TXT. Este ejemplo se usa para SPF (Sender Policy Framework) para evitar que otros se hagan pasar por tu dominio.
+
+Resources:
+  # Se crea la zona DNS en Route 53 para el dominio especificado.
+  DNSZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref DomainName  # El nombre del dominio que se pasará como parámetro (por defecto: example.com).
+
+  # Registro A: apunta a una dirección IP.
+  ARecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref DNSZone  # Se refiere a la zona DNS creada anteriormente.
+      Name: !Sub "${RecordAName}.${DomainName}"  # Combina el nombre del subdominio con el dominio (www.example.com).
+      Type: A  # Tipo de registro A (dirección IP).
+      TTL: '60'  # Tiempo de vida en segundos del registro.
+      ResourceRecords:
+        - !Ref RecordAValue  # La dirección IP a la que apunta el subdominio.
+      # El registro A se usa para mapear un subdominio (www) a una dirección IP (192.0.2.1).
+
+  # Registro CNAME: alias de otro dominio.
+  CNameRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref DNSZone  # Se refiere a la zona DNS creada.
+      Name: !Sub "${RecordCNameName}.${DomainName}"  # Combina el nombre del subdominio con el dominio (blog.example.com).
+      Type: CNAME  # Tipo de registro CNAME (alias).
+      TTL: '60'  # Tiempo de vida en segundos del registro.
+      ResourceRecords:
+        - !Ref RecordCNameValue  # El valor al que apunta el CNAME (en este caso, example.com).
+      # El registro CNAME se usa para hacer que un subdominio (blog) apunte a otro dominio (example.com).
+
+  # Registro MX: para configurar servidores de correo.
+  MXRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref DNSZone  # Se refiere a la zona DNS creada.
+      Name: !Sub "${RecordMXName}.${DomainName}"  # Combina el nombre del subdominio con el dominio (example.com).
+      Type: MX  # Tipo de registro MX (servidor de correo).
+      TTL: '60'  # Tiempo de vida en segundos del registro.
+      ResourceRecords:
+        - !Sub "${RecordMXPriority} ${RecordMXValue}"  # La prioridad y el servidor de correo al que apunta.
+      # El registro MX se usa para configurar el servidor de correo. En este ejemplo, apunta a mail.example.com.
+
+  # Registro TXT: se utiliza para configuraciones como SPF, validación de dominios, etc.
+  TXTRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref DNSZone  # Se refiere a la zona DNS creada.
+      Name: !Sub "${RecordTXTName}.${DomainName}"  # Combina el nombre del subdominio con el dominio (example.com).
+      Type: TXT  # Tipo de registro TXT (texto).
+      TTL: '60'  # Tiempo de vida en segundos del registro.
+      ResourceRecords:
+        - !Ref RecordTXTValue  # El valor del registro TXT (en este caso, una entrada SPF).
+      # El registro TXT se utiliza para diversas configuraciones, como el sistema SPF para la validación del correo electrónico.
+
+Outputs:
+  ZoneID:
+    Value: !Ref DNSZone  # Devuelve el ID de la zona DNS creada.
+    Description: El ID de la zona DNS creada en Route 53.
+    # Este ID puede ser utilizado para futuras referencias o integraciones con otros recursos.
+
