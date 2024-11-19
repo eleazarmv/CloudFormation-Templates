@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla para crear una instancia EC2 en AWS con configuración básica.
+
+Resources:
+  # Recurso para la Instancia EC2
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      # ID de la AMI: "ami-012967cc5a8c9f891"
+      ImageId: 'ami-012967cc5a8c9f891'  # Modifica este valor si deseas usar otra AMI.
+      
+      # Tipo de instancia: "t2.micro"
+      InstanceType: 't2.micro'  # Modifica el tipo de instancia según sea necesario.
+
+      # Nombre de la Instancia: "server-example"
+      Tags:
+        - Key: 'Name'
+          Value: 'server-example'  # Modifica el nombre si lo deseas.
+
+      # VPC y Subred a la que se asociará la instancia EC2
+      # Asegúrate de indicar el ID de la Subred adecuada.
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: 'true'  # La instancia tendrá una IP pública.
+          SubnetId: 'subnet-0bb1c79de3EXAMPLE'  # Modifica el ID de la subred según corresponda.
+          DeviceIndex: 0
+          
+      # Nota: La subred especificada (SubnetId) está asociada a una VPC.
+      # No es necesario especificar directamente el ID de la VPC aquí.
+      # La VPC será determinada por el ID de la Subred seleccionada.
+      
+      # Seguridad: Asocia un Security Group existente
+      SecurityGroupIds:
+        - 'sg-0123456789abcdef0'  # Modifica este valor con el ID del Security Group que deseas usar.
+
+      # Crear un par de claves para la instancia EC2
+      KeyName: 'server-key'  # Nombre del par de claves. Modifica este nombre como desees.
+      
+      # NOTA: Es importante tener en cuenta que el par de claves SSH debe haber sido creado previamente en AWS.
+      # CloudFormation solo puede referenciar un par de claves existente por nombre.
+      # Asegúrate de que el nombre especificado aquí ("server-key") coincida exactamente con el nombre de un par de claves ya creado en la consola de AWS
+      # o mediante la AWS CLI, ya que CloudFormation no puede generar ni proporcionar la clave privada para descargar.
+      # Si no tienes el par de claves creado, crea uno en la consola de AWS y asegúrate de 
+      # que el nombre en "KeyName" coincida exactamente con el que creaste.
+
+      # Volúmenes adicionales y configuración del volumen raíz
+      BlockDeviceMappings:
+        # Configuración del volumen raíz de 250 GB (gp3)
+        - DeviceName: '/dev/sda1'
+          Ebs:
+            VolumeSize: 250  # Tamaño del volumen raíz en GB (250 GB).
+            VolumeType: 'gp3'  # Tipo de volumen GP3.
+        
+        # Configuración de volumen adicional de 100 GB (comentado, puedes descomentar si lo necesitas)
+        # - DeviceName: '/dev/sdf'
+        #   Ebs:
+        #     VolumeSize: 100  # Tamaño del volumen adicional en GB (100 GB).
+        #     VolumeType: 'gp3'  # Tipo de volumen GP3.
+
+Outputs:
+  # Salida con el ID de la instancia EC2 creada
+  InstanceId:
+    Value: !Ref EC2Instance
+    Description: El ID de la instancia EC2 creada.
