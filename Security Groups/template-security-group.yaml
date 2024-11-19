@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla para crear un Security Group con reglas de entrada para HTTP, HTTPS y SSH.
+
+Resources:
+  # Recurso para crear el Security Group
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: 'nsg-example'  # Nombre del Security Group. Cambia este valor si deseas un nombre diferente.
+      GroupDescription: 'Grupo de seguridad para servidores'  # Descripción del Security Group. Cambia si deseas otra descripción.
+      VpcId: 'vpc-0ed7502ae5e47a732'  # ID de la VPC a la que se asociará el Security Group. Cambia este valor por el ID de tu VPC.
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'  # Regla de salida predeterminada: permite todo el tráfico de salida. No es necesario agregarla explícitamente, pero la incluyo por claridad.
+          IpProtocol: '-1'  # Esto permite todo el tráfico de salida para todos los protocolos.
+      SecurityGroupIngress:
+        # Regla para HTTP (puerto 80)
+        - IpProtocol: 'tcp'  # Protocolo TCP
+          FromPort: '80'  # Puerto de entrada HTTP
+          ToPort: '80'  # Puerto de entrada HTTP
+          CidrIp: '0.0.0.0/0'  # Permite el acceso desde cualquier dirección IP.
+        
+        # Regla para HTTPS (puerto 443)
+        - IpProtocol: 'tcp'  # Protocolo TCP
+          FromPort: '443'  # Puerto de entrada HTTPS
+          ToPort: '443'  # Puerto de entrada HTTPS
+          CidrIp: '0.0.0.0/0'  # Permite el acceso desde cualquier dirección IP.
+
+        # Regla para SSH (puerto 22)
+        - IpProtocol: 'tcp'  # Protocolo TCP
+          FromPort: '22'  # Puerto de entrada SSH
+          ToPort: '22'  # Puerto de entrada SSH
+          CidrIp: '0.0.0.0/0'  # Permite el acceso desde cualquier dirección IP.
+
+Outputs:
+  # Salida del Security Group ID para que puedas ver el ID de este Security Group una vez creado.
+  SecurityGroupId:
+    Value: !Ref SecurityGroup  # Devuelve el ID del Security Group recién creado.
+    Description: El ID del Security Group creado.
